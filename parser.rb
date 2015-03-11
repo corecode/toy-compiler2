@@ -18,6 +18,14 @@ class Parser < Parslet::Parser
   root(:document)
 end
 
+class Transform < Parslet::Transform
+  rule(:list => subtree(:x)) { x }
+  rule(:integer => simple(:x)) { Integer(x) }
+  rule(:symbol => simple(:x)) { x.to_sym }
+end
+
 if $0 == __FILE__
-  puts Parser.new.parse_with_debug($stdin.read)
+  require 'pp'
+  raw = Parser.new.parse_with_debug($stdin.read)
+  pp Transform.new.apply(raw)
 end
