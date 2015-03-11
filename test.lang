@@ -1,0 +1,4 @@
+(fn foo (a b)
+  (let ((c (+ a b)))
+    (set! c (+ a 5))
+    (+ c b)))
