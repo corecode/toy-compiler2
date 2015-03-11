@@ -1,6 +1,6 @@
 $counter = 0
 
-def unique(name='%')
+def unique(name='%_')
   $counter += 1
   "#{name}#{$counter}"
 end
@@ -11,7 +11,7 @@ def translate(expr, env)
     "i32 #{expr}"
   when Symbol
     retval = unique()
-    puts "#{retval} = load i32, i32* #{env[expr]}"
+    puts "#{retval} = load i32* #{env[expr]}"
     retval
   when Array
     l = expr
