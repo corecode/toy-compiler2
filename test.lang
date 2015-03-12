@@ -1,4 +1,13 @@
-(fn foo (a b)
-  (let ((c (+ a b)))
-    (set! c (+ a 5))
-    (+ c b)))
+(fn factorial (n)
+  (if (< n 2)
+      1
+      (* n (factorial (- n 1)))))
+
+(fn factorial2 (n)
+  (let ((prod n))
+    (while (> n 1)
+      (set! n (- n 1))
+      (set! prod (* prod n)))))
+
+(fn main ()
+  (factorial 10))
