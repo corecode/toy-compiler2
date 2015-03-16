@@ -34,6 +34,20 @@ end
   }
 end
 
+def new_scope(varnames, env)
+  newenv = env.dup
+  varnames.each do |sym|
+    name, _ = *sym
+    p = "%#{name}"
+    symname = unique(p)
+    val = yield sym
+    puts "#{symname} = alloca i32"
+    puts "store i32 #{val}, i32* #{symname}"
+    newenv[name] = symname
+  end
+  newenv
+end
+
 def translate(expr, env)
   case expr
   when Numeric
@@ -53,36 +67,24 @@ def translate(expr, env)
       body = l[3..-1]
 
       newenv = {}
-      arglist = params.map{|a, t| "i32 %#{a}"}
+      arglist = params.map{|a| "i32 %#{a}"}
 
       puts "define i32 @#{name}(#{arglist.join(", ")}) {"
 
-      params.each do |sym|
-        p = "%#{sym}"
-        symname = unique(p)
-        puts "#{symname} = alloca i32"
-        puts "store i32 #{p}, i32* #{symname}"
-        newenv[sym] = symname
-      end
+      newenv = new_scope(params, {}) {|param| "%#{param}"}
 
       retval = "void"
       body.each do |e|
         retval = translate(e, newenv)
       end
+
       puts "ret i32 #{retval}"
       puts "}"
     when :let
       varlist = l[1]
-      newenv = env.clone
-      varlist.each do |argpair|
-        sym = argpair[0]
-        expr = argpair[1]
 
-        val = translate(expr, newenv)
-        symname = unique("%#{sym}")
-        puts "#{symname} = alloca i32"
-        puts "store i32 #{val}, i32* #{symname}"
-        newenv[sym] = symname
+      newenv = new_scope(varlist, env) do |sym, expr|
+        translate(expr, env)
       end
 
       body = l[2..-1]
@@ -153,7 +155,7 @@ def translate(expr, env)
         retval
       end
     end
-  end
+end
 end
 
 if $0 == __FILE__
